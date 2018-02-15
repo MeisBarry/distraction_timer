@@ -19,8 +19,8 @@ class Timer(object):
             platform (str): The current OS (e.g. Windows, etc.)
             start (float): Starting time from time.time()
             time_remaining (float): Time remaining in the timer
-            done (bool): Timer complete status
             time_remaining_clean (str): A pretty-printed representation of the time remaining
+            done (bool): Timer complete status
 
             REFRESH_INTERVAL = Not sure, Barry included it
             POWERSHELL_LOC = The location of the PowerShell executable
@@ -34,11 +34,18 @@ class Timer(object):
         self.platform = platform.system()
 
         self.start = 0.0
-        self.time_remaining = 0.0
         self.done = False
 
         self.REFRESH_INTERVAL = 0.2
         self.POWERSHELL_LOC = "C:/WINDOWS/system32/WindowsPowerShell/v1.0/powershell.exe"
+
+    @property
+    def time_remaining(self):
+        """ The time remaining; returns 0 if timer 'runs out' """
+        tr = self.start + (self.mins * 60) - time.time()
+        if tr <= 0:
+            return 0
+        return tr
 
     @property
     def time_remaining_clean(self):
@@ -48,13 +55,13 @@ class Timer(object):
     def done_beeps_linux(self):
         """ Beeps for open-source """
         for i in range(self.beeps):
-            os.system("play \
+            os.system('play \
                         --no-show-progress \
                         --null \
                         --channels 1 \
                         synth 0.1 \
                         sine {base_freq} \
-                        vol 0.3".format(base_freq=self.freq))
+                        vol 0.3'.format(base_freq=self.freq))
             time.sleep(0.1)
 
     def done_beeps_windows(self):
@@ -72,8 +79,7 @@ class Timer(object):
     def run(self):
         """ Actually start the timer """
         self.start = time.time()
-        while self.start + (self.mins * 60) > time.time():
-            self.time_remaining = (self.start + (self.mins * 60)) - time.time()
+        while self.time_remaining:
             print_flush(self.time_remaining_clean)
             time.sleep(self.REFRESH_INTERVAL)
         print()  # puts your prompt on a new line
@@ -88,7 +94,7 @@ class Timer(object):
                 self.done_beeps_linux()
         else:
             out_str = 'Your timer is not yet finished, {time_remain} remaining'
-            print(out_str.format(time_remain= self.time_remaining_clean))
+            print(out_str.format(time_remain=self.time_remaining_clean))
 
     def begin(self):
         self.run()
