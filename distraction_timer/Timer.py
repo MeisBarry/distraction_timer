@@ -3,7 +3,7 @@ import platform
 import subprocess
 import time
 
-from src.Utility import print_flush
+from distraction_timer.Utility import print_flush
 
 
 class Timer(object):
